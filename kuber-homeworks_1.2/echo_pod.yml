@@ -1,0 +1,10 @@
+apiVersion: v1
+kind: Pod
+metadata:
+  name: echoserv
+  labels:
+      app: webecho
+spec:
+    containers:
+      - name: echo
+        image: gcr.io/kubernetes-e2e-test-images/echoserver:2.2
