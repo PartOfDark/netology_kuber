@@ -1,0 +1,14 @@
+apiVersion: v1
+kind: Pod
+metadata:
+  name: nginxandmulti
+  labels:
+    app: web
+spec:
+  containers:
+    - name: nginx
+      image: nginx:latest
+  initContainers:
+    - name: multitool
+      image: wbitt/network-multitool:75bfa32
+      command: ["sleep", "15"]

@@ -1,0 +1,27 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: nginx
+spec:
+  selector:
+    matchLabels:
+      app: nginxandmulti
+  template:
+    metadata:
+      labels:
+        app: nginxandmulti
+    spec:
+      containers:
+        - name: nginx
+          image: nginx:latest
+          ports:
+            - containerPort: 80
+      initContainers:
+        - name: busy
+          image: busybox:latest
+          command:
+            [
+              "sh",
+              "-c",
+              "until nslookup nginx-svc.default.svc.cluster.local; do echo 'waiting for service'; sleep 2; done",
+            ]
