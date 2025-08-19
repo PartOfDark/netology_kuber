@@ -1,0 +1,19 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: nginxfront
+spec:
+  #  replicas: 3
+  selector:
+    matchLabels:
+      app: nginxfront
+  template:
+    metadata:
+      labels:
+        app: nginxfront
+    spec:
+      containers:
+        - name: nginx
+          image: nginx:latest
+          ports:
+            - containerPort: 80
