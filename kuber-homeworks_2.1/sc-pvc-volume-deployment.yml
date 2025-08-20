@@ -1,0 +1,85 @@
+---
+apiVersion: storage.k8s.io/v1
+kind: StorageClass
+metadata:
+  name: local-sc
+provisioner: kubernetes.io/no-provisioner
+volumeBindingMode: WaitForFirstConsumer
+---
+apiVersion: v1
+kind: PersistentVolume
+metadata:
+  name: new-volume
+spec:
+  capacity:
+    storage: 1Gi
+  volumeMode: Filesystem
+  accessModes:
+    - ReadWriteOnce
+  persistentVolumeReclaimPolicy: Retain
+  storageClassName: local-sc
+  local:
+    path: /var/k8svolume
+  nodeAffinity:
+    required:
+      nodeSelectorTerms:
+        - matchExpressions:
+            - key: kubernetes.io/hostname
+              operator: In
+              values:
+                - minikube
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: k8cpvc
+spec:
+  resources:
+    requests:
+      storage: 500Mi
+  volumeMode: Filesystem
+  storageClassName: local-sc
+  accessModes:
+    - ReadWriteOnce
+
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: busy-multi
+spec:
+  selector:
+    matchLabels:
+      app: busy-multi
+  template:
+    metadata:
+      labels:
+        app: busy-multi
+    spec:
+      containers:
+        - name: busy
+          image: busybox:latest
+          command:
+            - sh
+            - -c
+            - |
+              while true; do echo "$(date +"%Y-%m-%d %H:%M:%S") HI" >> /var/output/output.log; sleep 5; done
+          volumeMounts:
+            - name: vol
+              mountPath: /var/output
+        - name: multi
+          image: wbitt/network-multitool:latest
+          env:
+            - name: HTTP_PORT
+              value: "8080"
+            - name: HTTPS_PORT
+              value: "11443"
+          ports:
+            - containerPort: 8080
+          volumeMounts:
+            - name: vol
+              mountPath: /var/input
+      volumes:
+        - name: vol
+          persistentVolumeClaim:
+            claimName: k8cpvc

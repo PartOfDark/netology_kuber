@@ -1,0 +1,40 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: busy-multi
+spec:
+  selector:
+    matchLabels:
+      app: busy-multi
+  template:
+    metadata:
+      labels:
+        app: busy-multi
+    spec:
+      containers:
+        - name: busy
+          image: busybox:latest
+          command:
+            - sh
+            - -c
+            - |
+              while true; do echo "$(date +"%Y-%m-%d %H:%M:%S") HI" >> /var/output/output.log; sleep 5; done
+          volumeMounts:
+            - name: vol
+              mountPath: /var/output
+        - name: multi
+          image: wbitt/network-multitool:latest
+          env:
+            - name: HTTP_PORT
+              value: "8080"
+            - name: HTTPS_PORT
+              value: "11443"
+          ports:
+            - containerPort: 8080
+          volumeMounts:
+            - name: vol
+              mountPath: /var/input
+      volumes:
+        - name: vol
+          hostPath:
+            path: /var/data
