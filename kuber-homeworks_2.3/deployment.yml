@@ -1,0 +1,52 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: nginx
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: nginxandmulti
+  template:
+    metadata:
+      labels:
+        app: nginxandmulti
+    spec:
+      containers:
+        - name: nginx
+          image: nginx:latest
+          ports:
+            - containerPort: 80
+          volumeMounts:
+            - name: html-volume
+              mountPath: /usr/share/nginx/html/
+        - name: multi
+          image: wbitt/network-multitool:latest
+          env:
+            - name: HTTP_PORT
+              value: "8080"
+            - name: HTTPS_PORT
+              value: "11443"
+          ports:
+            - containerPort: 8080
+      volumes:
+        - name: html-volume
+          configMap:
+            name: my-configmap
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: my-configmap
+data:
+  index.html: |-
+    <!DOCTYPE html>
+    <html>
+    <head>
+      <title>Page Title</title>
+    </head>
+    <body>
+      <h1>Hello, World!</h1>
+      <p>This is a simple paragraph on an HTML page.</p>
+    </body>
+    </html>

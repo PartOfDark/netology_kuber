@@ -1,0 +1,29 @@
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: app-ingress
+  annotations:
+    nginx.ingress.kubernetes.io/rewrite-target: /
+spec:
+  tls:
+    - hosts:
+        - myapp.example.com
+      secretName: myapp-tls
+  rules:
+    - host: myapp.example.com
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: nginx-web
+                port:
+                  number: 9001
+          - path: /api
+            pathType: Prefix
+            backend:
+              service:
+                name: nginx-web
+                port:
+                  number: 9002
