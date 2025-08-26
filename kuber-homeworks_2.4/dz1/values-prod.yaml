@@ -1,0 +1,9 @@
+backend:
+  image: wbitt/network-multitool:a7bac73
+  replicaCount: 2
+  labels: multiback
+
+frontend:
+  image: nginx:1.29.1
+  replicaCount: 2
+  labels: nginxfront
